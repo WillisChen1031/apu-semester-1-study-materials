@@ -25,8 +25,9 @@
   - `Lecture Slides/`
   - `Lab Exercises/`
   - `MOCK_TEST/`
-  - `Digital Thinking and Innovation (032026-SIM)/`
   - `README.md`
+- `Digital Thinking and Innovation (032026-SIM)/`
+  - 资料保留；不做考点总结。
 
 ## 总复习优先级
 
