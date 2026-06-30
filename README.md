@@ -25,6 +25,7 @@
 - `Introduction to Databases (032026-LCP)/`
   - `Lecture Slides/`
   - `Lab Exercises/`
+  - `Additional Materials/`
   - `MOCK_TEST/`
   - `README.md`
 - `Digital Thinking and Innovation (032026-SIM)/`

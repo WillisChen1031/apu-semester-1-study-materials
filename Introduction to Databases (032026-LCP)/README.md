@@ -4,6 +4,14 @@
 
 Database 有 mock test 截图，重点非常集中：概念、ERD、normalization、SQL。
 
+### 补充资料
+
+- [3 types of relationship between entities-PDF version.pdf](Additional%20Materials/3%20types%20of%20relationship%20between%20entities-PDF%20version.pdf)
+- [Database Normalization-step by step guide-PDF version.pdf](Additional%20Materials/Database%20Normalization-step%20by%20step%20guide-PDF%20version.pdf)
+- [Database Normalization-step by step guide - Copy.docx](Additional%20Materials/Database%20Normalization-step%20by%20step%20guide%20-%20Copy.docx)
+- [Normalization Example.pdf](Additional%20Materials/Normalization%20Example.pdf)
+- [Normalization Example.docx](Additional%20Materials/Normalization%20Example.docx)
+
 ### 高频考点：Mock Test 已覆盖/高度相关
 
 - database / DBMS / data / information 的定义与区别。
