@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Python Mock Test Quiz</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; background: #f5f7f8; color: #111; }
+  header { background: #cfe9ec; padding: 24px 32px; }
+  main { max-width: 1050px; margin: 24px auto; padding: 0 16px 40px; }
+  .card { background: white; border: 1px solid #ddd; border-radius: 12px; padding: 22px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  h1 { margin: 0; font-size: 28px; }
+  h2 { margin-top: 0; font-size: 20px; }
+  pre { background: #f0f3f4; padding: 12px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; }
+  code { background: #eef2f3; padding: 2px 4px; border-radius: 4px; }
+  label { display: block; margin: 8px 0; line-height: 1.5; }
+  textarea { width: 100%; min-height: 120px; font-family: Consolas, monospace; font-size: 14px; padding: 10px; border-radius: 8px; border: 1px solid #bbb; box-sizing: border-box; }
+  .controls { position: sticky; bottom: 0; background: white; border-top: 1px solid #ddd; padding: 14px; display: flex; gap: 12px; justify-content: center; }
+  button { background: #1976d2; color: white; border: none; border-radius: 8px; padding: 10px 18px; font-size: 16px; cursor: pointer; }
+  button.secondary { background: #666; }
+  .result { font-weight: bold; margin-top: 10px; }
+  .correct { color: #0a7a2f; }
+  .wrong { color: #b00020; }
+  .explain { display: none; background: #fff8df; border-left: 4px solid #e1ad01; padding: 10px 12px; margin-top: 10px; }
+  .answer { display: none; background: #eef9ee; border-left: 4px solid #2e7d32; padding: 10px 12px; margin-top: 10px; }
+  .note { color: #555; font-size: 14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Python Mock Test Quiz</h1>
+  <p>Includes original questions, answers, automatic checking, and explanations.</p>
+</header>
+<main id="quiz"></main>
+<div class="controls">
+  <button onclick="checkAll()">Check Answers</button>
+  <button class="secondary" onclick="showAllExplanations()">Show All Explanations</button>
+  <button class="secondary" onclick="resetQuiz()">Reset</button>
+</div>
+<script>
+const questions = [
+{type:'text', q:`Write a Python code that asks the student to enter their TP number and then prints the length of the TP number.`, answer:`tp = input("Type your TP number: ")\nprint(len(tp))`, check:s=>/input\s*\(/.test(s)&&/len\s*\(/.test(s)&&/print\s*\(/.test(s), exp:`Use input() to get the TP number, len() to calculate the length, and print() to output it.`},
+{type:'text', q:`Write assignment statements: a. Adds 2 to num1 and assigns to num2; b. Multiplies num2 by 4 and assigns to num1; c. Divides num1 by 2.9 and assigns to num2; d. Subtracts 8 from num2 and assigns to num1.`, answer:`num2 = num1 + 2\nnum1 = num2 * 4\nnum2 = num1 / 2.9\nnum1 = num2 - 8`, check:s=>/num2\s*=\s*num1\s*\+\s*2/.test(s)&&/num1\s*=\s*num2\s*\*\s*4/.test(s)&&/num2\s*=\s*num1\s*\/\s*2\.9/.test(s)&&/num1\s*=\s*num2\s*-\s*8/.test(s), exp:`Use assignment statements in the form variable = expression.`},
+{type:'text', q:`Rewrite the code after removing all syntactical errors:\n\ndef calculate_average(score1, score2, score3\n    average = (score1 + score2 + score3 / 3\n    p "The average score is: ", average\nreturn average`, answer:`def calculate_average(score1, score2, score3):\n    average = (score1 + score2 + score3) / 3\n    print("The average score is:", average)\n    return average`, check:s=>/def\s+calculate_average\s*\(\s*score1\s*,\s*score2\s*,\s*score3\s*\)\s*:/.test(s)&&/average\s*=\s*\(\s*score1\s*\+\s*score2\s*\+\s*score3\s*\)\s*\/\s*3/.test(s)&&/print\s*\(/.test(s)&&/return\s+average/.test(s), exp:`The function header needs ):, average calculation needs correct parentheses, print() must be used, and return must be inside the function.`},
+{type:'text', q:`Identify errors and write the correct code for parts a-e:\n\na. bmi=21.8 / print bmi\nb. num1=12 / num2=num1+num2 / print(num1 And num2)\nc. print("x="x)\nd. x=23 / 4=y\ne. a,b,c=2,8,4 / print(a,b,c) / d,e,f=a,b,c / print(d;e;f)`, answer:`a -> print(bmi)\nb -> num2 = 0; num2 = num1 + num2; print(num1, "and", num2)\nc -> print("x=", x)\nd -> y = 4\ne -> print(d, e, f)`, check:s=>/print\s*\(\s*bmi\s*\)/.test(s)&&/num2\s*=/.test(s)&&/print\s*\(\s*num1\s*,/.test(s)&&/print\s*\(\s*["']x=/.test(s)&&/y\s*=\s*4/.test(s)&&/print\s*\(\s*d\s*,\s*e\s*,\s*f\s*\)/.test(s), exp:`Python 3 uses print(...). Variables must be defined before use. Assignment must put variable on the left. Function arguments are separated with commas.`},
+{type:'text', q:`Write a Python program to calculate average of 3 exam scores and print the student's average grade according to the grade table. The program should read name, TP number, gender, score1, score2 and score3.`, answer:`name = input("Enter student's name: ")\ntp = input("Enter TP number: ")\ngender = input("Enter gender (M/F): ")\nscore1 = int(input("Enter score for Exam 1: "))\nscore2 = int(input("Enter score for Exam 2: "))\nscore3 = int(input("Enter score for Exam 3: "))\naverage = (score1 + score2 + score3) / 3\nif average >= 80:\n    grade = "A+"\nelif average >= 75:\n    grade = "A"\nelif average >= 70:\n    grade = "B+"\nelif average >= 65:\n    grade = "B"\nelif average >= 60:\n    grade = "C+"\nelif average >= 55:\n    grade = "C"\nelif average >= 50:\n    grade = "C-"\nelif average >= 40:\n    grade = "D"\nelse:\n    grade = "F"\nprint("Student Details")`, check:s=>/int\s*\(\s*input/.test(s)&&/average\s*=/.test(s)&&/if\s+average\s*>=\s*80\s*:/.test(s)&&/elif\s+average\s*>=\s*75\s*:/.test(s)&&/else\s*:/.test(s)&&/print\s*\(/.test(s), exp:`Scores should be converted with int(input()). Calculate average, then use if-elif-else from high score to low score.`},
+{type:'mcq', q:`Consider the code below. What is the output?\n\ndef bar(num):\n    num += 2\n\ndef foo(num):\n    num += 1\n    bar(num)\n    return num\n\nnum = 0\nnum = foo(num)\nprint(num)`, options:['3','2','0','1'], answer:3, exp:`foo(0) changes its local num to 1. bar(num) changes only bar's local variable and returns nothing. foo returns 1.`},
+{type:'mcq', q:`Choose the correct Python code that produces the output: Abc.def`, options:['print("abc.DEF".upper())','print("abc. DEF".title())','print("abc. DEF".lower())','print("abc.DEF".capitalize())'], answer:3, exp:`capitalize() makes the first character uppercase and the rest lowercase.`},
+{type:'mcq', q:`To open a file "data.txt" for reading, we use ________.`, options:['file = open("c:\\data.txt", "r")','file = open(file = "data.txt", "r+")','file = open("data.txt", "r")','file = open(file = "c:\\data.txt", "r")'], answer:2, exp:`open("data.txt", "r") opens the file in read mode.`},
+{type:'mcq', q:`Trace the output:\n\nmark = 80\nif (mark >= 80 and mark <= 100):\n    print("Grade A")\nelif (mark >= 60 and mark < 80):\n    print("Grade B")\nelif (mark >= 50 and mark < 60):\n    print("Grade C")`, options:['Grade A','Grade C','Runtime Error','Grade B'], answer:0, exp:`80 satisfies the first if condition, so it prints Grade A. else is optional.`},
+{type:'mcq', q:`Which of the following is considered as a tuple?`, options:['(1,2,3,4)','[1,2,3,4]','{1,2,3,4}','"1,2,3,4"'], answer:0, exp:`Tuples use parentheses (). Lists use [], sets use {}, strings use quotes.`},
+{type:'mcq', q:`What does the slice myList[1:4] do?`, options:['Extracts items 2, 3, and 4 from myList.','Extracts items 2 and 3 from myList.','Extracts items 1, 2, and 3 from myList.','Extracts items 1 to 4 from myList.'], answer:0, exp:`[1:4] includes index 1, 2, 3, and excludes index 4.`},
+{type:'mcq', q:`my_list = ['a', 'b', 'c', 'd', 'e']; print(my_list[-4:-1]). What is the output?`, options:[`['c', 'd', 'e']`,`['b', 'c']`,`['b', 'c', 'd']`,`['c', 'd']`], answer:2, exp:`-4 is 'b' and -1 is 'e'. The end index is excluded, so output is ['b','c','d'].`},
+{type:'mcq', q:`my_list = [10, 20, 30, 40, 50]; print(my_list[:3]). What is the output?`, options:['[10, 20, 30]','[30, 40, 50]','[10, 20, 30, 40]','[10, 20]'], answer:0, exp:`[:3] means from the start to index 3, excluding index 3.`},
+{type:'mcq', q:`What keyword is used to define a function in Python?`, options:['func','declare','def','function'], answer:2, exp:`Python uses def to define a function.`},
+{type:'mcq', q:`def calc(x, y):\n    return x * y\nresult = calc(2, 3)\nprint(result)\n\nWhat is the output?`, options:['6','5','Null','23'], answer:0, exp:`2 * 3 = 6.`},
+{type:'mcq', q:`def check_num(number):\n    if number % 2 == 0:\n        return True\n    else:\n        return False\nprint(check_num(3))\n\nWhat is the output?`, options:['False','True','Null','Type Error Happen'], answer:0, exp:`3 % 2 is 1, so the condition is false and the function returns False.`},
+{type:'mcq', q:`Based on this code, using end=' ' in a print statement will result in outputs being separated by spaces instead of new lines.\n\nprint("Hello", end=' ')\nprint("World")`, options:['False','True'], answer:1, exp:`end=' ' replaces the default newline with a space, so the output is Hello World.`},
+{type:'mcq', q:`my_string = "Hello, World!"; print(my_string[7:12]). What is the output?`, options:[', Worl','ello,','World!','World'], answer:3, exp:`Index 7 is W and index 12 is !. The end index is excluded, so output is World.`},
+{type:'mcq', q:`The if condition below is to validate ___ number.\n\nif (num1 % 2 == 0):`, options:['odd','even','prime','percentage of 2'], answer:1, exp:`num % 2 == 0 means the number is divisible by 2, so it is even.`},
+{type:'mcq', q:`numbers = [2,4,6,8,10]\ntotal = 0\nfor n in numbers:\n    total += n\nprint(total)\n\nWhat is the output?`, options:['30','31','33','32'], answer:0, exp:`2 + 4 + 6 + 8 + 10 = 30.`},
+{type:'mcq', q:`Given k=2, l='2', m='foo', n='bar', o=6.0, p=True. Which expression produces TypeError?`, options:['print(m + " " + n)','print(k + l)','print(o + k)','print(k + p)'], answer:1, exp:`k + l means int + str, which causes TypeError.`},
+{type:'mcq', q:`Built-in function that will return the length of a list or string.`, options:['len()','sizeof()','str()','getLength()'], answer:0, exp:`len() returns the length of a list, string, tuple, etc.`},
+{type:'mcq', q:`myFood = []. Choose the correct statement to add 'Pizza' to the myFood list at index 0.`, options:[`myFood[0] = 'Pizza'`,`myFood.insert(0, 'Pizza')`,`myFood.insert(1, 'Pizza')`,`myFood[1] = 'Pizza'`], answer:1, exp:`For an empty list, index 0 does not exist yet. Use insert(0, value).`},
+{type:'mcq', q:`Which of the following mode refers to append data to the file?`, options:['b+','w','r','a+'], answer:3, exp:`a+ means append and read. w overwrites, r reads only.`},
+{type:'mcq', q:`Choose which statement is NOT valid string in Python.`, options:[`name = 'James'`,`name = "\\\"James\\\""`,`name = "James"`,`name = 'James"`], answer:3, exp:`The quotes must match. Starting with ' and ending with " is invalid.`}
+];
+function escapeHtml(s){return String(s).replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function render(){
+  const root=document.getElementById('quiz');
+  questions.forEach((q,i)=>{
+    const div=document.createElement('section'); div.className='card'; div.id='q'+i;
+    let html=`<h2>Question ${i+1}</h2><pre>${escapeHtml(q.q)}</pre>`;
+    if(q.type==='mcq'){
+      q.options.forEach((op,j)=>{html+=`<label><input type="radio" name="q${i}" value="${j}"> ${String.fromCharCode(97+j)}. ${escapeHtml(op)}</label>`;});
+    } else {
+      html+=`<textarea id="ta${i}" placeholder="Type your answer here..."></textarea><p class="note">Code-writing questions use flexible keyword checking. Different correct code may still need teacher review.</p>`;
+    }
+    html+=`<div class="result" id="r${i}"></div><div class="answer" id="a${i}"><b>Reference answer:</b><pre>${escapeHtml(q.answer ?? q.options?.[q.answer])}</pre></div><div class="explain" id="e${i}"><b>Explanation:</b> ${escapeHtml(q.exp)}</div>`;
+    div.innerHTML=html; root.appendChild(div);
+  });
+}
+function checkAll(){
+  let score=0;
+  questions.forEach((q,i)=>{
+    let ok=false;
+    if(q.type==='mcq'){
+      const selected=document.querySelector(`input[name="q${i}"]:checked`);
+      ok=selected && Number(selected.value)===q.answer;
+    } else {
+      const val=document.getElementById('ta'+i).value.replace(/\s+/g,' ');
+      ok=q.check(val);
+    }
+    const r=document.getElementById('r'+i);
+    r.textContent=ok?'Correct':'Wrong / needs review';
+    r.className='result '+(ok?'correct':'wrong');
+    document.getElementById('a'+i).style.display='block';
+    document.getElementById('e'+i).style.display='block';
+    if(ok) score++;
+  });
+  alert(`Score: ${score} / ${questions.length}`);
+}
+function showAllExplanations(){
+  questions.forEach((q,i)=>{document.getElementById('a'+i).style.display='block';document.getElementById('e'+i).style.display='block';});
+}
+function resetQuiz(){ location.reload(); }
+render();
+</script>
+</body>
+</html>
