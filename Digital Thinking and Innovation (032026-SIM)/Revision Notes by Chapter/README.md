@@ -22,6 +22,7 @@ These notes are organized by lecture chapter. Each chapter uses English as the m
 10. [09 Digital Currencies and Blockchain](./09_Digital_Currencies_and_Blockchain.md)
 11. [10 Digital Security](./10_Digital_Security.md)
 12. [11 Digital Ethics](./11_Digital_Ethics.md)
+13. [12 Quiz Extra Points](./12_Quiz_Extra_Points.md)
 
 ## Main Revision Priority
 
@@ -31,3 +32,4 @@ Start with definitions, then comparisons, then lists, then case studies.
 - Comparisons: Millennials vs Gen Z, data vs information, traditional analysis vs systems thinking, outsourcing vs crowdsourcing, IoT vs IoE, digital currency vs cryptocurrency, DoS vs DDoS, bribe vs gift, ethics vs morality vs law.
 - Lists: Gen Z characteristics, agile mindset characteristics, digital trends, AI frontiers, analytics types, IoT benefits/issues, cryptocurrency advantages/cons, malware types, disaster recovery plan parts, code of ethics examples, ethical issues.
 - Case studies: Airbnb, Kodak, Waze, Wikipedia, MH370/Tomnod, Spotify, Netflix, Coca-Cola, UOB, Amazon Fresh/Whole Foods, PepsiCo, Amazon Go, Bitcoin/CBDC.
+- Extra quiz-only points: check [12 Quiz Extra Points](./12_Quiz_Extra_Points.md) for concepts that appeared in online quizzes but were not found in the current lecture/tutorial/mock files.
