@@ -2,6 +2,8 @@
 
 [返回总 README](../README.md)
 
+按章节整理版：[Revision Notes by Chapter](Revision%20Notes%20by%20Chapter/README.md)
+
 Database 有 mock test 截图，重点非常集中：概念、ERD、normalization、SQL。
 
 ### 补充资料

@@ -2,6 +2,8 @@
 
 [返回总 README](../README.md)
 
+按章节整理版：[Revision Notes by Chapter](Revision%20Notes%20by%20Chapter/README.md)
+
 Python 没有模拟测试，因此以下考点按 lecture slides、lab exercises、tutorial MCQ 综合整理，越靠前越需要熟练。
 
 ### 1. Problem Solving, Algorithm, Pseudocode, Flowchart
