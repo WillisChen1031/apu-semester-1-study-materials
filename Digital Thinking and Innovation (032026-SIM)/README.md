@@ -23,6 +23,11 @@
 
 `mock_test_2.md` 已作为复习优先级参考；下面的解释和考点仍只根据 `Lecture Slides/` 课件整理，不使用外部搜索资料。
 
+## 题库
+
+- [客观题题库与中文解析](Question%20Bank.md)：按原始题库截图逐章整理，保留选择、判断、填空、配对和多选题，已排除简答题。
+- [按章节整理的复习笔记](Revision%20Notes%20by%20Chapter/README.md)
+
 ## 复习优先级
 
 1. 先背所有定义题：Digital Generation、Digital Thinking、Digital Literacy、Agile Thinking、Digital Culture、Digital Society、Systems Thinking、IoT、IoE、Data Analytics、Big Data Analytics、AI、Expert System、Blockchain、Cryptocurrency、Digital Security Risk、Computer Ethics。

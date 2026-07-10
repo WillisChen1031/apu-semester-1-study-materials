@@ -31,6 +31,8 @@
 - `Digital Thinking and Innovation (032026-SIM)/`
   - `Lecture Slides/`
   - `Tutorial Exercises/`
+  - `Revision Notes by Chapter/`
+  - `Question Bank.md`
   - `Academic Writing Guidelines/`
   - `mock_test_2.md`
   - `README.md`
