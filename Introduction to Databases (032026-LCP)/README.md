@@ -4,6 +4,8 @@
 
 按章节整理版：[Revision Notes by Chapter](Revision%20Notes%20by%20Chapter/README.md)
 
+Mock 1 + Mock 2 逐题答案与完整解析：[Mock Exam 1 & 2 全解析](MOCK_TEST/mock_exam_1_and_2_full_review.md)
+
 Database 有 mock test 截图，重点非常集中：概念、ERD、normalization、SQL。
 
 ### 补充资料

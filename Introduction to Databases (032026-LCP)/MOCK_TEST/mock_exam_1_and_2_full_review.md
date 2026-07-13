@@ -1,0 +1,594 @@
+# Introduction to Databases — Mock Exam 1 & 2 全解析
+
+> 适用课程：Introduction to Databases (032026-LCP)  
+> 整理原则：题目与标准答案来自两份 Moodle Mock Review；解析使用中文，关键术语和 SQL 保留英文。大题答案经过语法和约束补全，适合作为考试书写模板。
+
+## 先看这张速查表
+
+| 主题 | 必背判断 |
+|---|---|
+| Primary key | 唯一且不可为 `NULL`；多个字段组成时叫 composite key |
+| Candidate key | 所有能够唯一识别记录的最小属性集；其中一个被选为 primary key |
+| Foreign key | 引用相关表的 primary/candidate key；可重复，是否可空取决于 participation |
+| Entity integrity | Primary key 每个值唯一且非空 |
+| Referential integrity | 每个非空 FK 必须匹配被引用表中已有的 key |
+| 1NF | 原子值、无 repeating group |
+| 2NF | 1NF，并消除对复合键的 partial dependency |
+| 3NF | 2NF，并消除 transitive dependency |
+| M:N | 一定要增加 associative/bridge table |
+| Derived attribute | 通常不存，节省空间并避免维护不一致；需要时计算 |
+
+---
+
+# Mock Exam 1
+
+## Q1 Primary key
+
+**答案：must be unique。**
+
+Primary key 用来唯一识别每一行，因此不能重复，也不能为 `NULL`。它不一定是表中第一个字段，也不一定是数字。
+
+## Q2 Metadata
+
+**答案：It describes the data types, table structures, and constraints。**
+
+Metadata 是“描述数据的数据”，例如表名、列名、数据类型、长度、PK/FK、`NOT NULL` 等约束；实际客户、订单等内容才是 user data。
+
+## Q3 Normalization：Student–Subject–Teacher（20 分）
+
+### 业务规则
+
+- Student 可修读多个 Subject。
+- 每个 Subject 由一个 Teacher 教授。
+- 一个 Teacher 可教授多个 Subject。
+
+### UNF → 1NF
+
+先把重复组展开，保证每格只有一个原子值。1NF relation 可写成：
+
+```text
+ENROLMENT_UNF(
+  StudentID, SubjectID, SubjectName, Mark,
+  StuFirstName, StuLastName, StuEnrollYear,
+  TeacherID, TeacherFirstName, TeacherLastName
+)
+```
+
+最合理的行标识是 `(StudentID, SubjectID)`：同一学生对同一科目只有一条成绩。Mock suggested answer 把 `TeacherID` 也列入 composite key，但按“每科仅一名教师”的业务规则，`SubjectID → TeacherID`，所以 `TeacherID` 不需要成为主键的一部分。
+
+### Functional dependencies
+
+```text
+StudentID → StuFirstName, StuLastName, StuEnrollYear
+SubjectID → SubjectName, TeacherID
+TeacherID → TeacherFirstName, TeacherLastName
+(StudentID, SubjectID) → Mark
+```
+
+### 1NF → 2NF
+
+原表主键为 `(StudentID, SubjectID)`。学生资料只依赖 `StudentID`，科目资料只依赖 `SubjectID`，都是 partial dependencies，必须拆开：
+
+```text
+STUDENT(StudentID PK, StuFirstName, StuLastName, StuEnrollYear)
+SUBJECT(SubjectID PK, SubjectName, TeacherID, TeacherFirstName, TeacherLastName)
+ENROLMENT(StudentID PK/FK, SubjectID PK/FK, Mark)
+```
+
+### 2NF → 3NF
+
+在 `SUBJECT` 中有：
+
+```text
+SubjectID → TeacherID → TeacherFirstName, TeacherLastName
+```
+
+这是 transitive dependency，因此再拆出 `TEACHER`：
+
+```text
+STUDENT(StudentID PK, StuFirstName, StuLastName, StuEnrollYear)
+TEACHER(TeacherID PK, TeacherFirstName, TeacherLastName)
+SUBJECT(SubjectID PK, SubjectName, TeacherID FK)
+ENROLMENT(StudentID PK/FK, SubjectID PK/FK, Mark)
+```
+
+此时每个非键属性只依赖“键、整个键、且只依赖键”，达到 3NF。
+
+## Q4 Data vs information
+
+**答案：data。**
+
+客户地址这种未经加工的事实是 data；经过组织、分析并具有语境的结果才是 information。
+
+## Q5 `NOT NULL`
+
+**答案：Ensures that a column cannot have a null value。**
+
+`NULL` 表示未知或缺失，不等于空字符串或数字 0。`NOT NULL` 只禁止空值，并不自动保证唯一。
+
+## Q6 可成功执行的 SQL
+
+**答案：**
+
+```sql
+SELECT *
+FROM Employee
+WHERE Country = 'Malaysia'
+ORDER BY Name DESC, Country;
+```
+
+其余选项分别缺少列清单/`VALUES`、`DELETE FROM` 语法错误、表名含空格却未转义。`ORDER BY` 可按多个列排序。
+
+## Q7 Database 的错误描述
+
+**答案：it must contain multiple tables。**
+
+数据库通常含多表，但定义上并非必须；它可以只有一张表。数据库是 shared、integrated structure，并保存 user data 与 metadata。
+
+## Q8 Business rule
+
+**答案：i, ii, iv。**
+
+- i 正确：业务规则帮助确定 relationship、participation 和 constraint。
+- ii 正确：它帮助理解数据的 nature、role、scope。
+- iii 错误：好的业务规则必须清楚、明确、可验证，不能 ambiguous。
+- iv 正确：运营环境变化时规则也必须更新。
+
+## Q9 ERD：HitRock Records（20 分）
+
+### Entities
+
+```text
+MUSICIAN(SSN PK, Name, Address, Phone)
+INSTRUMENT(InstrumentID PK, Name, MusicalKey)
+ALBUM(AlbumID PK, Title, CopyrightDate, Format, ProducerSSN FK)
+SONG(SongID PK, Title, Author, AlbumID FK)
+MUSICIAN_INSTRUMENT(SSN PK/FK, InstrumentID PK/FK)
+PERFORMANCE(SSN PK/FK, SongID PK/FK)
+```
+
+### Relationships 与 cardinality
+
+- `MUSICIAN M:N INSTRUMENT`：双方都可多个，因此用 `MUSICIAN_INSTRUMENT` bridge table。
+- `ALBUM 1:M SONG`：每张 album 有多首 song；每首 song 最多属于一张 album。若题意要求每首歌必属于 album，则 `SONG.AlbumID NOT NULL`。
+- `MUSICIAN M:N SONG`：song 至少由一位 musician 演奏；musician 可演奏多首 song，用 `PERFORMANCE`。
+- `MUSICIAN 1:M ALBUM`（produces）：每张 album **exactly one** producer，所以 `ProducerSSN NOT NULL`；musician 可制作 0..N 张 album。
+
+作图得分点：标出 PK/FK、M:N 的 associative entities、album producer 的 mandatory one，以及 song performer 的 minimum one。
+
+## Q10 Project–Employee ERD
+
+**答案：Project is optional to employee。**
+
+意思是 Employee 可以暂时没有 Project，即 Employee 对 Project 的最小 cardinality 为 0。不要只看 “many” 端；optional/mandatory 看的是最小值 0 或 1。
+
+## Q11 `ORDER BY`
+
+**答案：**
+
+```sql
+ORDER BY Salary DESC, Name DESC;
+```
+
+SQL 先按第一个排序键 Salary 从高到低；只有 salary 相同才用 Name 从 Z 到 A 决定顺序。
+
+## Q12 SQL 全称
+
+**答案：Structured Query Language。**
+
+## Q13 Teacher / Subject SQL（20 分）
+
+### (a) 建立 Teacher
+
+```sql
+CREATE TABLE Teacher (
+    TeacherID CHAR(4) PRIMARY KEY,
+    Name      VARCHAR(50) NOT NULL,
+    Gender    VARCHAR(10) NOT NULL,
+    Salary    DECIMAL(8,2) NOT NULL CHECK (Salary >= 0)
+);
+```
+
+### (b) 建立 Subject
+
+```sql
+CREATE TABLE Subject (
+    SubjectID CHAR(5) PRIMARY KEY,
+    TeacherID CHAR(4) NOT NULL,
+    Name      VARCHAR(50) NOT NULL,
+    ClassDay  VARCHAR(10) NOT NULL,
+    Level     VARCHAR(10) NOT NULL,
+    CONSTRAINT FK_Subject_Teacher
+      FOREIGN KEY (TeacherID) REFERENCES Teacher(TeacherID)
+);
+```
+
+FK 两端的数据类型与长度应一致，而且必须先建立被引用的 `Teacher`。
+
+### (c) Level 为 Form 1 或 Form 4，且星期三
+
+```sql
+SELECT *
+FROM Subject
+WHERE Level IN ('Form 1', 'Form 4')
+  AND ClassDay = 'Wednesday';
+```
+
+注意括号逻辑：若用 `OR`，应写 `(Level='Form 1' OR Level='Form 4') AND ...`。
+
+### (d) 男教师，工资 3000–4000
+
+```sql
+SELECT *
+FROM Teacher
+WHERE Gender = 'Male'
+  AND Salary BETWEEN 3000 AND 4000;
+```
+
+`BETWEEN` 包含上下界。
+
+### (e) 星期一但不是 Form 1
+
+```sql
+SELECT *
+FROM Subject
+WHERE ClassDay = 'Monday'
+  AND Level <> 'Form 1';
+```
+
+## Q14 Functional dependency
+
+**答案：knowing A, you can look up B。**
+
+`A → B` 表示每个 A 值只对应一个确定的 B 值；反向 `B → A` 不一定成立。
+
+## Q15 Single entity 内的 relationship
+
+**答案：unary relationship。**
+
+也叫 recursive relationship，例如 Employee supervises Employee。
+
+## Q16 DBMS 保存数据定义的位置
+
+**答案：data dictionary。**
+
+Data dictionary/system catalog 保存 metadata，如 schema、列、约束和权限。
+
+## Q17 2NF 且无 transitive dependency
+
+**答案：3NF。**
+
+## Q18 表之间的逻辑连接
+
+**答案：(common attribute) foreign key。**
+
+FK 在子表中引用父表的 key，从而建立逻辑关系。
+
+## Q19 不属于 data anomaly
+
+**答案：create。**
+
+经典 anomalies 是 insertion、update、deletion anomaly。
+
+## Q20 Table 是 rows 与 columns 的矩阵
+
+**答案：intersections。**
+
+每个 row-column intersection 是一个 cell，1NF 要求其中是单一原子值。
+
+## Q21 Foreign key 必须满足
+
+**答案：match the field value of a primary key in a related table。**
+
+更严谨地说：每个**非空** FK 必须匹配被引用的 candidate/primary key。FK 可以重复，也可能允许 `NULL`。
+
+## Q22 File system limitation
+
+**答案：security features are likely to be inadequate。**
+
+传统文件系统常有数据冗余、不一致、共享困难、安全性和并发控制不足等问题；支持 SQL 和良好的多用户访问反而是 DBMS 优势。
+
+## Q23 At most one related entity
+
+**答案：One-to-one relationship。**
+
+“At most one” 表示最大 cardinality 为 1；是否 optional 仍要看最小值是 0 还是 1。
+
+---
+
+# Mock Exam 2
+
+## Q1 Candidate keys
+
+**答案：ProductID & SerialNumber。**
+
+题目说明 `ProductID` 必须唯一，`SerialNumber` 也不能重复，因此两者各自都是 candidate key。这里的 `&` 表示“两个都是候选键”，不是把两列合成 composite key。Name 可重复，Description 可空，不能可靠唯一识别记录。
+
+## Q2 多字段 Primary key
+
+**答案：composite key。**
+
+## Q3 Single entity 内的 relationship
+
+**答案：unary relationship。**
+
+Unary/recursive relationship 的两个角色都来自同一 entity type。
+
+## Q4 Hotel SQL（20 分）
+
+### (a) 预订超过 2 次的客人姓名与电话
+
+```sql
+SELECT g.GuestName, g.ContactNumber
+FROM Guest AS g
+JOIN Reservation AS r ON r.GuestID = g.GuestID
+GROUP BY g.GuestID, g.GuestName, g.ContactNumber
+HAVING COUNT(*) > 2;
+```
+
+`WHERE` 过滤明细行，`HAVING` 过滤分组后的 aggregate result。选择了姓名和电话，就应把它们列入 `GROUP BY`（连同稳定的 GuestID）。
+
+### (b) Deluxe Twin 加价 10%
+
+```sql
+UPDATE Room
+SET Price = Price * 1.10
+WHERE Name = 'Deluxe Twin';
+```
+
+### (c) 预订 “1 king bed” 房型的客人
+
+```sql
+SELECT DISTINCT g.GuestName, g.ContactNumber
+FROM Guest AS g
+JOIN Reservation AS r ON r.GuestID = g.GuestID
+JOIN Room AS rm ON rm.RoomID = r.RoomID
+WHERE rm.Description = '1 king bed';
+```
+
+`DISTINCT` 防止同一客人多次订到该房型时重复出现。若题意是 description **包含**该文字，可改用 `LIKE '%1 king bed%'`。
+
+### (d) 建立 Reservation
+
+```sql
+CREATE TABLE Reservation (
+    ReservationID CHAR(6) PRIMARY KEY,
+    RoomID       CHAR(5) NOT NULL,
+    GuestID      CHAR(4) NOT NULL,
+    CheckInDate  DATE NOT NULL,
+    CheckOutDate DATE NOT NULL,
+    CONSTRAINT FK_Reservation_Room
+      FOREIGN KEY (RoomID) REFERENCES Room(RoomID),
+    CONSTRAINT FK_Reservation_Guest
+      FOREIGN KEY (GuestID) REFERENCES Guest(GuestID),
+    CONSTRAINT CK_Reservation_Dates
+      CHECK (CheckOutDate > CheckInDate)
+);
+```
+
+## Q5 Date 不允许的操作
+
+**答案：Multiply two dates。**
+
+日期可以比较、格式化，也可加减天数；两个日期相减通常得到间隔，但相乘没有业务意义。
+
+## Q6 不保存 derived attribute 的优势
+
+**答案：Save storage space。**
+
+Derived attribute 可由其他数据算出，例如 `Total = Quantity × UnitPrice`。不保存它可节省空间，也减少源数据改变后 derived value 过期的问题；代价是查询时需要计算。
+
+## Q7 Author–Book–Publisher 需要多少张表
+
+**答案：4 tables。**
+
+```text
+AUTHOR
+BOOK
+PUBLISHER
+AUTHOR_BOOK  ← 解决 Author 与 Book 的 M:N
+```
+
+Publisher–Book 是 1:M，只需把 `PublisherID` 放入 `BOOK` 作 FK，无需额外 bridge table。
+
+## Q8 Normal form 层级
+
+**答案：1NF, 2NF。**
+
+2NF 比 1NF 结构更好，3NF 比 2NF 更好；每一级都包含前一级条件再消除一种依赖问题。
+
+## Q9 Weak entity
+
+**答案：Dependent。**
+
+`DEPENDENT` 的 PK 是 `(DepID, EmpID)`，其中 `EmpID` 同时是 owner `EMPLOYEE` 的 FK。Dependent 的身份依赖 Employee，符合 weak entity 特征。
+
+## Q10 表之间的逻辑连接
+
+**答案：foreign key。**
+
+## Q11 Entity integrity
+
+**答案：all primary key entries are unique。**
+
+完整规则还包括 PK 不得为 `NULL`。复合 PK 的任何组成部分也不能为 `NULL`。
+
+## Q12 ERD：Car Manufacturing（20 分）
+
+### 推荐 entities
+
+```text
+CAR(CarID PK, Model, ManufactureYear, Colour)
+PART(PartID PK, Name, Description, Price)
+SUPPLIER(SupplierID PK, Name, Address, Contact)
+PURCHASE(SupplierID PK/FK, PartID PK/FK, PurchaseDate PK, Quantity)
+CAR_PART(CarID PK/FK, PartID PK/FK, QuantityUsed)
+TEST(TestID PK, CarID FK, TestDate, Feedback)
+```
+
+### Relationship 分析
+
+- Supplier 与 Part 是 M:N：一个 supplier 可供应多种 part；同一种 part 可来自不同 supplier。`PURCHASE` 记录 supplier、part、日期及数量，因此它是 associative entity。
+- Car 与 Part 通常也是 M:N：一辆车使用多个 parts，同一种 part 可用于多辆 car，用 `CAR_PART`。
+- Car 与 Test 是 1:M：每次 test 只属于一辆 car；每辆 car 必须测试 **1..5 次**。在 ERD 上标 `CAR 1 — TEST 1..5`。上限 5 一般需 application logic、trigger 或 assertion 才能严格实现。
+
+作图时不要把 PurchaseDate 塞进 Supplier 或 Part；它描述的是一次“供应/采购”关系。
+
+## Q13 Referential integrity
+
+**答案：every non-null foreign key value references an existing primary key value。**
+
+FK 若允许 optional relationship 可以为 `NULL`；一旦非空，就必须能在父表找到对应 key。
+
+## Q14 只能有一个值的 attribute
+
+**答案：single-valued。**
+
+Single-valued 讨论“值的数量”；simple attribute 讨论“能否继续拆分”，两者不要混淆。
+
+## Q15 Numeric data
+
+**答案：True。**
+
+重点是能进行“有意义”的算术。电话号码虽然由数字组成，但加减乘除无意义，通常应存为字符类型。
+
+## Q16 删除被 FK 引用的父记录
+
+**答案：it violates the referential integrity rule。**
+
+直接删除会留下 orphan record。解决方法包括拒绝删除、先处理子记录，或明确定义 `ON DELETE CASCADE/SET NULL`。
+
+## Q17 历史数据与趋势预测
+
+**答案：Data warehouse。**
+
+Data warehouse 整合历史数据，服务分析、统计和战略决策；transactional database 主要处理日常即时交易。
+
+## Q18 1NF 且无 partial dependency
+
+**答案：2NF。**
+
+Partial dependency 只会在 composite key 场景出现：非键属性只依赖复合键的一部分。
+
+## Q19 Lecturer–Class participation
+
+**答案：fully mandatory on both sides。**
+
+- 每个 Lecturer 对应 1..3 个 Class：Lecturer 端最小值为 1。
+- 每个 Class 对应 exactly 1 Lecturer：Class 端最小值也为 1。
+
+双方 minimum cardinality 都是 1，所以双方 mandatory。
+
+## Q20 不可再拆分的 attribute
+
+**答案：simple。**
+
+例如 Age 可视为 simple；Address 若可拆成 Street、City、Postcode，则是 composite。
+
+## Q21 Sales Order Normalization（20 分）
+
+### UNF → 1NF
+
+原销售单中 Item Ordered 是 repeating group。将每个 item 展开成一行：
+
+```text
+SALES_UNF(
+  CustomerNo, CustomerName, CustomerAddress,
+  SalesOrderNo, SalesOrderDate,
+  ClerkNo, ClerkName,
+  ItemNo, ItemDescription, Quantity, UnitPrice,
+  LineTotal, OrderTotal
+)
+```
+
+1NF 的自然 composite key 是 `(SalesOrderNo, ItemNo)`；CustomerNo 和 ClerkNo 不必加入，因为它们由 SalesOrderNo 决定。
+
+### Functional dependencies
+
+```text
+CustomerNo → CustomerName, CustomerAddress
+ClerkNo → ClerkName
+ItemNo → ItemDescription, UnitPrice
+SalesOrderNo → SalesOrderDate, CustomerNo, ClerkNo, OrderTotal
+(SalesOrderNo, ItemNo) → Quantity, LineTotal
+```
+
+并且：
+
+```text
+LineTotal = Quantity × UnitPrice
+OrderTotal = SUM(LineTotal for the order)
+```
+
+后二者是 derived attributes，通常不建议存储。
+
+### 1NF → 2NF
+
+消除对复合键一部分的 partial dependencies：
+
+```text
+ITEM(ItemNo PK, ItemDescription, UnitPrice)
+SALES_ORDER(SalesOrderNo PK, SalesOrderDate,
+            CustomerNo, CustomerName, CustomerAddress,
+            ClerkNo, ClerkName, OrderTotal)
+SALES_ORDER_DETAIL(SalesOrderNo PK/FK, ItemNo PK/FK, Quantity, LineTotal)
+```
+
+### 2NF → 3NF
+
+`SALES_ORDER` 仍有 transitive dependencies：
+
+```text
+SalesOrderNo → CustomerNo → CustomerName, CustomerAddress
+SalesOrderNo → ClerkNo → ClerkName
+```
+
+拆分后的 3NF schema：
+
+```text
+CUSTOMER(CustomerNo PK, CustomerName, CustomerAddress)
+CLERK(ClerkNo PK, ClerkName)
+ITEM(ItemNo PK, ItemDescription, UnitPrice)
+SALES_ORDER(SalesOrderNo PK, SalesOrderDate, CustomerNo FK, ClerkNo FK)
+SALES_ORDER_DETAIL(SalesOrderNo PK/FK, ItemNo PK/FK, Quantity)
+```
+
+`LineTotal` 和 `OrderTotal` 可在查询时计算：
+
+```sql
+SELECT d.SalesOrderNo,
+       SUM(d.Quantity * i.UnitPrice) AS OrderTotal
+FROM SalesOrderDetail AS d
+JOIN Item AS i ON i.ItemNo = d.ItemNo
+GROUP BY d.SalesOrderNo;
+```
+
+Mock suggested answer 在 2NF 和 3NF 展示了相同五张表；考试解释时必须明确指出 Customer、Clerk 的 transitive dependencies，并说明为何拆表，才能稳拿过程分。
+
+## Q22 Patient–Appointment ERD
+
+**答案：i, ii, iv。**
+
+- i：Appointment 对 Patient 是 optional——Patient 可以暂时没有 appointment。
+- ii：每个 Appointment 由 one and only one Patient 创建。
+- iii 错：Patient 是 zero or many appointments，不是 one or many。
+- iv：Patient 对 Appointment 是 mandatory——appointment 不可脱离 patient 存在。
+
+## Q23 最不像 data-model business rule
+
+**答案：Casual Fridays take place in the summer。**
+
+其余规则都能影响数据库中的 entity、relationship 或 constraint，例如工时上限、培训人数范围、客户付款关系。Casual Friday 更像组织政策，无法自然映射为此题语境中的数据模型结构。
+
+---
+
+# 考前自测清单
+
+1. 能否看到 M:N 就立即画 bridge table，并把两端 PK 带入成为 PK/FK？
+2. 能否从业务规则写出 min/max cardinality，例如 `0..N`、`1..1`、`1..5`？
+3. 能否先写 functional dependencies，再解释 partial 与 transitive dependency？
+4. 会不会在 aggregate 条件中使用 `HAVING`，并正确写 `GROUP BY`？
+5. 建表时是否写了 PK、FK、`NOT NULL`、匹配的数据类型，以及合理的 `CHECK`？
+6. 是否分清 single-valued vs simple、candidate vs composite、entity vs referential integrity？
+
+建议复习顺序：先闭卷做两套选择题，再重写 Mock 1 Q3/Q9/Q13 和 Mock 2 Q4/Q12/Q21；这些大题覆盖 normalization、ERD 和 SQL 三个核心板块。
